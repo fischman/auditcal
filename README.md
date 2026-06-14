@@ -8,11 +8,11 @@ name+notification combinations you consider correct.
 ## What it does
 
 - OAuth into Google (read-only) using Google Identity Services.
-- Lists every event (and Google Task) due between Monday of this week and Sunday
-  of next week, ordered by day/time, grouped by day.
-- For each row shows: day/date/time, type (event/task), calendar name, event
-  name, and the notifications set on it (resolving "use default" reminders to the
-  calendar's actual default reminders). Rows with no notifications are flagged.
+- Lists every event between Monday of this week and Sunday of next week, ordered
+  by day/time, grouped by day.
+- For each row shows: day/date/time, calendar name, event name, and the
+  notifications set on it (resolving "use default" reminders to the calendar's
+  actual default reminders). Rows with no notifications are flagged.
 - Click a row to open it in Google Calendar (`htmlLink`).
 - "Bless" a row with the ✓ button: its **name + exact notification set** is saved
   to `localStorage` and persists across page loads. Blessed rows get green
@@ -23,7 +23,6 @@ name+notification combinations you consider correct.
 
 - `calendar.readonly` — list calendars + read events incl. reminders and the
   per-calendar default reminders.
-- `tasks.readonly` — read task lists/tasks so tasks appear alongside events.
 
 No write scopes are requested. The OAuth token is held only in memory; it is not
 persisted. The only persisted data is your Client ID and your blessed list, both
@@ -33,7 +32,7 @@ in this browser's `localStorage`.
 
 1. In Google Cloud Console, create an OAuth 2.0 **Client ID** of type *Web
    application*.
-2. Enable the **Google Calendar API** and **Google Tasks API** for the project.
+2. Enable the **Google Calendar API** for the project.
 3. Add the origin where you serve this app (e.g. `http://localhost:8000` or your
    exe.dev proxy origin) to the client's **Authorized JavaScript origins**.
 4. Serve the folder statically, e.g.:
@@ -48,8 +47,6 @@ in this browser's `localStorage`.
 
 ## Notes / limitations
 
-- Google Tasks carry no notification metadata via the API, so tasks always show
-  "no notifications" (you can still bless them if that's expected).
 - Only calendars with `selected` not explicitly false are scanned (mirrors what's
   checked in your Google Calendar UI).
 - Recurring events are expanded (`singleEvents=true`) so each instance in range is

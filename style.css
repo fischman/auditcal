@@ -123,16 +123,6 @@ button:disabled { opacity: 0.5; cursor: default; }
   gap: 8px;
   align-items: center;
 }
-.event .badge {
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  padding: 1px 6px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  color: var(--muted);
-}
-.event .badge.badge-task { color: var(--blue); border-color: var(--blue); }
 
 .event .name { font-weight: 600; margin: 2px 0 4px; word-break: break-word; }
 

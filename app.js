@@ -1,12 +1,8 @@
 'use strict';
 
-// ---- Minimal read-only scopes ----
+// ---- Minimal read-only scope ----
 // calendar.readonly: list calendars + read events (incl. reminders & default reminders).
-// tasks.readonly:    read task lists + tasks (shown alongside events).
-const SCOPES = [
-  'https://www.googleapis.com/auth/calendar.readonly',
-  'https://www.googleapis.com/auth/tasks.readonly',
-].join(' ');
+const SCOPES = 'https://www.googleapis.com/auth/calendar.readonly';
 
 const LS_CLIENT_ID = 'auditcal.clientId';
 const LS_BLESSED = 'auditcal.blessed';
@@ -158,7 +154,6 @@ async function loadAll() {
       if (!startInfo) continue;
       const { list, sig } = resolveReminders(ev, calDefaults);
       rows.push({
-        type: 'event',
         name: ev.summary || '(no title)',
         start: startInfo.date,
         allDay: startInfo.allDay,
@@ -168,38 +163,6 @@ async function loadAll() {
         calName: cal.summaryOverride || cal.summary,
       });
     }
-  }
-
-  // Google Tasks
-  try {
-    setStatus('Loading tasks…');
-    const taskLists = await gapiPaged(
-      'https://tasks.googleapis.com/tasks/v1/users/@me/lists', 'items', {});
-    for (const tl of taskLists.items) {
-      const tasks = await gapiPaged(
-        'https://tasks.googleapis.com/tasks/v1/lists/' +
-          encodeURIComponent(tl.id) + '/tasks',
-        'items',
-        { dueMin: timeMin, dueMax: timeMax, showCompleted: 'false', maxResults: '100' });
-      for (const t of tasks.items) {
-        if (!t.due) continue;
-        const due = new Date(t.due);
-        if (due < start || due >= end) continue;
-        // Google Tasks carry no notification metadata via the API.
-        rows.push({
-          type: 'task',
-          name: t.title || '(untitled task)',
-          start: due,
-          allDay: true, // task due dates are date-only
-          notifs: [],
-          notifSig: 'none',
-          link: 'https://calendar.google.com/calendar/r',
-          calName: tl.title,
-        });
-      }
-    }
-  } catch (e) {
-    console.warn('tasks load failed', e);
   }
 
   rows.sort((a, b) => a.start - b.start);
@@ -232,12 +195,12 @@ function render(data) {
 
   const blessedCount = rows.filter((r) => blessed.has(blessKey(r.name, r.notifSig))).length;
   el.summary.textContent =
-    rows.length + ' item(s) from ' + DAY_FMT.format(start) + ' through ' +
+    rows.length + ' event(s) from ' + DAY_FMT.format(start) + ' through ' +
     DAY_FMT.format(new Date(end - 1)) + ' — ' + blessedCount + ' blessed, ' +
     (rows.length - blessedCount) + ' unblessed.';
 
   if (!rows.length) {
-    el.list.innerHTML = '<div class="empty">No events or tasks in range.</div>';
+    el.list.innerHTML = '<div class="empty">No events in range.</div>';
     return;
   }
 
@@ -272,7 +235,6 @@ function renderRow(r, data) {
   const timeStr = r.allDay ? 'all day' : TIME_FMT.format(r.start);
   time.innerHTML =
     '<span>' + timeStr + '</span>' +
-    '<span class="badge badge-' + r.type + '">' + r.type + '</span>' +
     '<span>' + escapeHtml(r.calName || '') + '</span>';
 
   const name = document.createElement('div');
@@ -353,7 +315,7 @@ async function loadAndRender() {
   try {
     const data = await loadAll();
     render(data);
-    setStatus('Loaded ' + data.rows.length + ' item(s).');
+    setStatus('Loaded ' + data.rows.length + ' event(s).');
   } catch (e) {
     if (e.message === 'auth-expired') {
       setStatus('Session expired — click Connect again.', true);
