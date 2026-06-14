@@ -6,6 +6,7 @@ const SCOPES = 'https://www.googleapis.com/auth/calendar.readonly';
 
 const LS_CLIENT_ID = 'auditcal.clientId';
 const LS_BLESSED = 'auditcal.blessed';
+const LS_SHOW_BLESSED = 'auditcal.showBlessed';
 
 // ---- DOM ----
 const $ = (id) => document.getElementById(id);
@@ -19,10 +20,12 @@ const el = {
   results: $('results'),
   summary: $('summary'),
   list: $('list'),
+  showBlessed: $('showBlessed'),
 };
 
 let tokenClient = null;
 let accessToken = null;
+let lastData = null; // most recently loaded {rows,start,end}, for re-render on toggle
 
 // ---- Status helpers ----
 function setStatus(msg, isError) {
@@ -194,19 +197,32 @@ function render(data) {
   el.list.innerHTML = '';
 
   const blessedCount = rows.filter((r) => blessed.has(blessKey(r.name, r.notifSig))).length;
+  const unblessedCount = rows.length - blessedCount;
+  const showBlessed = el.showBlessed.checked;
   el.summary.textContent =
     rows.length + ' event(s) from ' + DAY_FMT.format(start) + ' through ' +
     DAY_FMT.format(new Date(end - 1)) + ' — ' + blessedCount + ' blessed, ' +
-    (rows.length - blessedCount) + ' unblessed.';
+    unblessedCount + ' unblessed' +
+    (showBlessed ? '.' : ' (blessed hidden).');
 
   if (!rows.length) {
     el.list.innerHTML = '<div class="empty">No events in range.</div>';
     return;
   }
 
+  const visible = showBlessed
+    ? rows
+    : rows.filter((r) => !blessed.has(blessKey(r.name, r.notifSig)));
+
+  if (!visible.length) {
+    el.list.innerHTML = '<div class="empty">All events blessed — nothing to review. ' +
+      'Enable “Show blessed events” to see them.</div>';
+    return;
+  }
+
   const today = new Date();
   let lastDayKey = null;
-  for (const r of rows) {
+  for (const r of visible) {
     const dayKey = r.start.toDateString();
     if (dayKey !== lastDayKey) {
       lastDayKey = dayKey;
@@ -314,6 +330,7 @@ function onToken(resp) {
 async function loadAndRender() {
   try {
     const data = await loadAll();
+    lastData = data;
     render(data);
     setStatus('Loaded ' + data.rows.length + ' event(s).');
   } catch (e) {
@@ -360,6 +377,12 @@ function init() {
     localStorage.setItem(LS_CLIENT_ID, v);
     tokenClient = null; // force re-init with new id
     setStatus('Client ID saved.');
+  });
+
+  el.showBlessed.checked = localStorage.getItem(LS_SHOW_BLESSED) === '1';
+  el.showBlessed.addEventListener('change', () => {
+    localStorage.setItem(LS_SHOW_BLESSED, el.showBlessed.checked ? '1' : '0');
+    if (lastData) render(lastData);
   });
 
   el.connect.addEventListener('click', connect);

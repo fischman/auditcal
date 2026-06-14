@@ -80,6 +80,18 @@ button:disabled { opacity: 0.5; cursor: default; }
 .status { color: var(--muted); font-size: 13px; min-height: 18px; }
 .status.error { color: var(--danger); }
 
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  color: var(--muted);
+  cursor: pointer;
+  margin-bottom: 10px;
+  user-select: none;
+}
+.toggle input { cursor: pointer; }
+
 .summary { color: var(--muted); font-size: 13px; margin-bottom: 12px; }
 
 .list { display: flex; flex-direction: column; gap: 6px; }
