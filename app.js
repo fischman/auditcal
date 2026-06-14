@@ -249,13 +249,12 @@ function renderRow(r, data) {
   const time = document.createElement('div');
   time.className = 'time';
   const timeStr = r.allDay ? 'all day' : TIME_FMT.format(r.start);
-  time.innerHTML =
-    '<span>' + timeStr + '</span>' +
-    '<span>' + escapeHtml(r.calName || '') + '</span>';
+  time.innerHTML = '<span>' + timeStr + '</span>';
 
   const name = document.createElement('div');
   name.className = 'name';
   name.textContent = r.name;
+  name.title = r.name;
 
   const notifs = document.createElement('div');
   notifs.className = 'notifs';

@@ -122,23 +122,37 @@ button:disabled { opacity: 0.5; cursor: default; }
 .event .main {
   flex: 1 1 auto;
   min-width: 0;
-  padding: 9px 12px;
+  padding: 8px 12px;
   cursor: pointer;
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
 }
 .event .main:hover { background: rgba(255,255,255,0.03); }
 
 .event .time {
+  flex: 0 0 auto;
   font-variant-numeric: tabular-nums;
   color: var(--muted);
   font-size: 12px;
-  display: flex;
-  gap: 8px;
-  align-items: center;
+  width: 64px;
+  text-align: right;
 }
 
-.event .name { font-weight: 600; margin: 2px 0 4px; word-break: break-word; }
+.event .name {
+  font-weight: 600;
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 360px;
+  white-space: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+}
+.event .name::-webkit-scrollbar { height: 5px; }
+.event .name::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
-.notifs { display: flex; gap: 6px; flex-wrap: wrap; }
+.notifs { display: flex; gap: 6px; flex-wrap: nowrap; flex: 0 0 auto; margin-left: auto; }
 .notif {
   font-size: 11px;
   background: var(--panel2);
