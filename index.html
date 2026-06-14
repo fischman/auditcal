@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>auditcal</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>auditcal</h1>
+    <div class="sub">Verify reminders on this &amp; next week's events (Mon–Sun)</div>
+  </header>
+
+  <main>
+    <section id="setup" class="panel">
+      <h2>Setup</h2>
+      <p class="hint">
+        Paste a Google OAuth <strong>Client ID</strong> (Web application type). It's
+        stored only in this browser's <code>localStorage</code>. Add this page's
+        origin to the client's "Authorized JavaScript origins".
+      </p>
+      <div class="row">
+        <input id="clientId" type="text" placeholder="xxxxxxxx.apps.googleusercontent.com" autocomplete="off">
+        <button id="saveClientId">Save</button>
+      </div>
+      <div class="row">
+        <button id="connect" class="primary">Connect Google Calendar</button>
+        <button id="disconnect" class="ghost" hidden>Disconnect</button>
+        <button id="refresh" class="ghost" hidden>Refresh</button>
+      </div>
+      <div id="status" class="status"></div>
+    </section>
+
+    <section id="results" class="panel" hidden>
+      <h2>Events &amp; tasks</h2>
+      <div id="summary" class="summary"></div>
+      <div id="list" class="list"></div>
+    </section>
+  </main>
+
+  <!-- Google Identity Services (OAuth token client). Required for Google sign-in. -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="app.js"></script>
+</body>
+</html>
