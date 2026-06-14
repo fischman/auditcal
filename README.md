@@ -24,8 +24,12 @@ name+notification combinations you consider correct.
 
 ## Permissions (minimal, read-only)
 
-- `calendar.readonly` — read events on the primary calendar incl. reminders and
-  the calendar's default reminders.
+- `calendar.events.readonly` — read events (incl. reminders and the calendar's
+  default reminders). This is the narrowest read scope available; it does not
+  grant calendar settings, ACLs, or the calendar list.
+
+Note: Google has no per-calendar OAuth scope, so the consent screen always says
+"all your calendars" even though this app only ever queries the primary calendar.
 
 No write scopes are requested. The OAuth token is held only in memory; it is not
 persisted. The only persisted data is your Client ID and your blessed list, both

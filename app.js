@@ -1,8 +1,11 @@
 'use strict';
 
 // ---- Minimal read-only scope ----
-// calendar.readonly: list calendars + read events (incl. reminders & default reminders).
-const SCOPES = 'https://www.googleapis.com/auth/calendar.readonly';
+// Google has no per-calendar OAuth scope, so any read scope covers ALL calendars
+// regardless of the fact that we only query /calendars/primary/events.
+// calendar.events.readonly is the narrowest scope that lets us read events +
+// their reminders; it does NOT grant calendar settings, ACLs, or calendar list.
+const SCOPES = 'https://www.googleapis.com/auth/calendar.events.readonly';
 
 const LS_CLIENT_ID = 'auditcal.clientId';
 const LS_BLESSED = 'auditcal.blessed';
