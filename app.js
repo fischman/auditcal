@@ -128,44 +128,31 @@ async function loadAll() {
   const timeMin = start.toISOString();
   const timeMax = end.toISOString();
 
-  setStatus('Loading calendars…');
+  setStatus('Loading events…');
   const rows = [];
 
-  // Calendars + events
-  const calList = await gapiPaged(
-    'https://www.googleapis.com/calendar/v3/users/me/calendarList',
-    'items', { minAccessRole: 'reader', showHidden: 'false' });
+  // Only the user's primary calendar.
+  const page = await gapiPaged(
+    'https://www.googleapis.com/calendar/v3/calendars/primary/events',
+    'items',
+    { timeMin, timeMax, singleEvents: 'true', orderBy: 'startTime', maxResults: '250' });
 
-  for (const cal of calList.items) {
-    if (cal.selected === false) continue; // skip calendars the user has unchecked
-    setStatus('Loading events: ' + (cal.summaryOverride || cal.summary) + '…');
-    let page;
-    try {
-      page = await gapiPaged(
-        'https://www.googleapis.com/calendar/v3/calendars/' +
-          encodeURIComponent(cal.id) + '/events',
-        'items',
-        { timeMin, timeMax, singleEvents: 'true', orderBy: 'startTime', maxResults: '250' });
-    } catch (e) {
-      console.warn('skip calendar', cal.id, e);
-      continue;
-    }
-    const calDefaults = page.meta.defaultReminders || [];
-    for (const ev of page.items) {
-      if (ev.status === 'cancelled') continue;
-      const startInfo = parseEventTime(ev.start);
-      if (!startInfo) continue;
-      const { list, sig } = resolveReminders(ev, calDefaults);
-      rows.push({
-        name: ev.summary || '(no title)',
-        start: startInfo.date,
-        allDay: startInfo.allDay,
-        notifs: list,
-        notifSig: sig,
-        link: ev.htmlLink || null,
-        calName: cal.summaryOverride || cal.summary,
-      });
-    }
+  const calName = page.meta.summary || 'Primary';
+  const calDefaults = page.meta.defaultReminders || [];
+  for (const ev of page.items) {
+    if (ev.status === 'cancelled') continue;
+    const startInfo = parseEventTime(ev.start);
+    if (!startInfo) continue;
+    const { list, sig } = resolveReminders(ev, calDefaults);
+    rows.push({
+      name: ev.summary || '(no title)',
+      start: startInfo.date,
+      allDay: startInfo.allDay,
+      notifs: list,
+      notifSig: sig,
+      link: ev.htmlLink || null,
+      calName,
+    });
   }
 
   rows.sort((a, b) => a.start - b.start);
