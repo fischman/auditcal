@@ -8,6 +8,10 @@
 const SCOPES = 'https://www.googleapis.com/auth/calendar.events.readonly';
 
 const LS_CLIENT_ID = 'auditcal.clientId';
+// Hardcoded default OAuth Client ID (public by design). Used to pre-populate the
+// field on a fresh load; a saved/edited value in localStorage overrides it.
+const DEFAULT_CLIENT_ID =
+  '273641572214-1tq5baha8ib06aac65nsdvfva1vmgnkj.apps.googleusercontent.com';
 const LS_BLESSED = 'auditcal.blessed';
 const LS_SHOW_BLESSED = 'auditcal.showBlessed';
 
@@ -287,7 +291,7 @@ function escapeHtml(s) {
 
 // ---- OAuth flow (Google Identity Services) ----
 function ensureTokenClient() {
-  const clientId = localStorage.getItem(LS_CLIENT_ID);
+  const clientId = localStorage.getItem(LS_CLIENT_ID) || el.clientId.value.trim() || DEFAULT_CLIENT_ID;
   if (!clientId) { setStatus('Enter and save a Client ID first.', true); return null; }
   if (!window.google || !google.accounts || !google.accounts.oauth2) {
     setStatus('Google Identity script not loaded yet — try again in a moment.', true);
@@ -358,7 +362,7 @@ function disconnect() {
 // ---- Wire up ----
 function init() {
   const savedId = localStorage.getItem(LS_CLIENT_ID);
-  if (savedId) el.clientId.value = savedId;
+  el.clientId.value = savedId || DEFAULT_CLIENT_ID;
 
   el.saveClientId.addEventListener('click', () => {
     const v = el.clientId.value.trim();
