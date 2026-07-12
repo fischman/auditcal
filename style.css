@@ -184,3 +184,24 @@ button:disabled { opacity: 0.5; cursor: default; }
 .bless-btn.do-unbless:hover { color: var(--danger); border-color: var(--danger); }
 
 .empty { color: var(--muted); padding: 20px 0; text-align: center; }
+
+/* Narrow screens: give the event title more horizontal room by pushing
+   the notifications chips onto a second row. */
+@media (max-width: 600px) {
+  .event .main {
+    flex-wrap: wrap;
+    row-gap: 6px;
+    align-items: center;
+  }
+  .event .time { width: auto; text-align: left; }
+  .event .name {
+    max-width: none;
+    flex: 1 1 auto;
+  }
+  .notifs {
+    flex-basis: 100%;
+    margin-left: 0;
+    flex-wrap: wrap;
+    row-gap: 6px;
+  }
+}
