@@ -197,6 +197,8 @@ button:disabled { opacity: 0.5; cursor: default; }
   .event .name {
     max-width: none;
     flex: 1 1 auto;
+    white-space: normal;
+    overflow: visible;
   }
   .notifs {
     flex-basis: 100%;
