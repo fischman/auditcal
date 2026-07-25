@@ -12,6 +12,8 @@ This was almost entirely written using LLMs. I (a human) have reviewed
 it for non-maliciousness, and it works well, but the code is pretty
 low-quality and the prose is worse.
 
+The chat logs that culminated in this code are in `shelley-conversations.html`.
+
 ## What it does
 
 - OAuth into Google (read-only) using Google Identity Services.
