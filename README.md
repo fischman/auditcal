@@ -1,9 +1,16 @@
 # auditcal
 
-Zero-dependency static webapp (plain HTML/CSS/JS, no build step) that audits the
-notifications/reminders on your Google Calendar events for the **current and next
-week** (each week = Monday–Sunday, local time), and lets you "bless" the
-name+notification combinations you consider correct.
+A webapp for auditing notifications/reminders on Google Calendar events.
+
+Primary use case is ensuring that
+https://github.com/fischman/AlarmingNotifications has notifications to
+alarm on.
+
+## **CAVEAT**
+
+This was almost entirely written using LLMs. I (a human) have reviewed
+it for non-maliciousness, and it works well, but the code is pretty
+low-quality and the prose is worse.
 
 ## What it does
 
@@ -37,11 +44,9 @@ in this browser's `localStorage`.
 
 ## Setup
 
-1. In Google Cloud Console, create an OAuth 2.0 **Client ID** of type *Web
-   application*.
+1. In [Google Cloud Console](https://console.cloud.google.com/auth/clients), create an OAuth 2.0 **Client ID** of type *Web application*.
 2. Enable the **Google Calendar API** for the project.
-3. Add the origin where you serve this app (e.g. `http://localhost:8000` or your
-   exe.dev proxy origin) to the client's **Authorized JavaScript origins**.
+3. Add the origin where you serve this app (e.g. `http://localhost:8000`) to the client's **Authorized JavaScript origins**.
 4. Serve the folder statically, e.g.:
 
    ```sh
