@@ -343,8 +343,7 @@ async function loadAndRender() {
 function connect() {
   const tc = ensureTokenClient();
   if (!tc) return;
-  // prompt='' lets Google skip consent if already granted this session.
-  tc.requestAccessToken({ prompt: accessToken ? '' : 'consent' });
+  tc.requestAccessToken({ prompt: ''}); // Empty prompt bypasses consent if already granted.
 }
 
 function disconnect() {
