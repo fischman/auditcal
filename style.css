@@ -182,6 +182,7 @@ button:disabled { opacity: 0.5; cursor: default; }
 .bless-btn.do-bless:hover { background: var(--green-bg); }
 .bless-btn.do-unbless { color: var(--muted); }
 .bless-btn.do-unbless:hover { color: var(--danger); border-color: var(--danger); }
+.bless-btn.once { font-size: 13px; margin-left: 6px; }
 
 .empty { color: var(--muted); padding: 20px 0; text-align: center; }
 

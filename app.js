@@ -57,6 +57,17 @@ function blessKey(name, notifSig) {
   return JSON.stringify([name || '', notifSig]);
 }
 
+// Occurrence-only key: also includes start+end date+times, so other
+// incarnations of the same event are NOT considered blessed by it.
+function blessKeyOnce(r) {
+  return JSON.stringify([r.name || '', r.notifSig, r.start.getTime(), (r.end || r.start).getTime()]);
+}
+
+// Blessed if either the name+notification combo or this exact occurrence was blessed.
+function isBlessedRow(r) {
+  return blessed.has(blessKey(r.name, r.notifSig)) || blessed.has(blessKeyOnce(r));
+}
+
 // ---- Date range: Monday of this week .. Sunday of next week (local time) ----
 function weekRange(now = new Date()) {
   const d = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -150,10 +161,12 @@ async function loadAll() {
     if (ev.status === 'cancelled') continue;
     const startInfo = parseEventTime(ev.start);
     if (!startInfo) continue;
+    const endInfo = parseEventTime(ev.end);
     const { list, sig } = resolveReminders(ev, calDefaults);
     rows.push({
       name: ev.summary || '(no title)',
       start: startInfo.date,
+      end: endInfo ? endInfo.date : startInfo.date,
       allDay: startInfo.allDay,
       notifs: list,
       notifSig: sig,
@@ -190,7 +203,7 @@ function render(data) {
   el.results.hidden = false;
   el.list.innerHTML = '';
 
-  const blessedCount = rows.filter((r) => blessed.has(blessKey(r.name, r.notifSig))).length;
+  const blessedCount = rows.filter(isBlessedRow).length;
   const unblessedCount = rows.length - blessedCount;
   const showBlessed = el.showBlessed.checked;
   el.summary.textContent =
@@ -206,7 +219,7 @@ function render(data) {
 
   const visible = showBlessed
     ? rows
-    : rows.filter((r) => !blessed.has(blessKey(r.name, r.notifSig)));
+    : rows.filter((r) => !isBlessedRow(r));
 
   if (!visible.length) {
     el.list.innerHTML = '<div class="empty">All events blessed — nothing to review. ' +
@@ -231,7 +244,8 @@ function render(data) {
 
 function renderRow(r, data) {
   const key = blessKey(r.name, r.notifSig);
-  const isBlessed = blessed.has(key);
+  const keyOnce = blessKeyOnce(r);
+  const isBlessed = isBlessedRow(r);
 
   const row = document.createElement('div');
   row.className = 'event' + (isBlessed ? ' blessed' : '');
@@ -267,17 +281,30 @@ function renderRow(r, data) {
 
   const actions = document.createElement('div');
   actions.className = 'actions';
-  const btn = document.createElement('button');
-  btn.className = 'bless-btn ' + (isBlessed ? 'do-unbless' : 'do-bless');
-  btn.textContent = isBlessed ? '✕' : '✓';
-  btn.title = isBlessed ? 'Unbless this name+notification combo' : 'Bless this name+notification combo';
-  btn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    if (blessed.has(key)) blessed.delete(key); else blessed.add(key);
-    saveBlessed(blessed);
-    render(data); // re-render to update all matching rows
-  });
-  actions.appendChild(btn);
+  // Bless buttons are toggles differing only in key, glyphs, tooltip, and
+  // (optionally) an extra CSS class.
+  const blessBtn = (key, glyphs, titles, extraClass) => {
+    const on = blessed.has(key);
+    const btn = document.createElement('button');
+    btn.className = ['bless-btn', extraClass, on ? 'do-unbless' : 'do-bless'].filter(Boolean).join(' ');
+    btn.textContent = on ? glyphs[1] : glyphs[0];
+    btn.title = on ? titles[1] : titles[0];
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (blessed.has(key)) blessed.delete(key); else blessed.add(key);
+      saveBlessed(blessed);
+      render(data); // re-render to update all matching rows
+    });
+    actions.appendChild(btn);
+  };
+  blessBtn(key, ['✓', '✕'], [
+    'Bless this name+notification combo',
+    'Unbless this name+notification combo']);
+  // Second button: bless only this occurrence (start+end date+times included
+  // in the key), leaving other incarnations of the same event unblessed.
+  blessBtn(keyOnce, ['✓¹', '✕¹'], [
+    'Bless this occurrence only (other incarnations of this event stay unblessed)',
+    'Unbless this occurrence only'], 'once');
 
   row.appendChild(main);
   row.appendChild(actions);
